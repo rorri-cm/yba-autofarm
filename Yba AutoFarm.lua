@@ -1,15 +1,13 @@
-repeat task.wait(1) until game:IsLoaded()
-
--- ======================= EXTERNAL CONFIGURATION =======================
--- If getgenv().Config exists, those values will be used.
-local _cfg = getgenv().Config or {}
+-- CONFIG - USER FRIENDLY (add ABOVE all the rest when using raw!)
+local _cfg = getgenv and getgenv().Config or {}
 local BuyLucky = (_cfg.BuyLucky ~= nil) and _cfg.BuyLucky or true
 local AutoSell = (_cfg.AutoSell ~= nil) and _cfg.AutoSell or true
 local WebhookURL = (_cfg.Webhook ~= nil) and _cfg.Webhook or ""
 local MaxMoneyAlert = (_cfg.MaxMoneyAlert ~= nil) and _cfg.MaxMoneyAlert or 1000000
--- ======================================================================
 
--- Remote Banlist System
+repeat task.wait(1) until game:IsLoaded()
+
+-- Sistema de Banlist Remota
 local BanlistURL = "https://raw.githubusercontent.com/rorri-cm/yba-autofarm/refs/heads/main/banlist.txt"
 local Player = game:GetService("Players").LocalPlayer
 
@@ -28,12 +26,12 @@ local function CheckBanlist()
     return false
 end
 
--- Check banlist at start
+-- Verificar banlist al inicio
 if CheckBanlist() then
     return
 end
 
--- Re-check banlist every 30 seconds
+-- Verificar banlist cada 30 segundos
 task.spawn(function()
     while true do
         task.wait(30)
@@ -44,7 +42,7 @@ end)
 print("Script Loading...")
 warn("Script Loading...")
 
--- SCREEN NOTIFICATION: "Loop loaded successfully, enjoy!" customized
+-- NOTIFICACIÓN EN PANTALLA: "Loop loaded successfully, enjoy!" personalizada
 do
     local PlayerGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui") or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
     local sg = Instance.new("ScreenGui")
@@ -57,9 +55,9 @@ do
     local txt = Instance.new("TextLabel")
     txt.Size = UDim2.new(0, 420, 0, 42)
     txt.AnchorPoint = Vector2.new(0.5, 0)
-    txt.Position = UDim2.new(0.5, 0, 0.04, 0)  -- Top center
+    txt.Position = UDim2.new(0.5, 0, 0.04, 0)
     txt.BackgroundTransparency = 0.13
-    txt.BackgroundColor3 = Color3.fromRGB(191, 127, 255) -- pastel purple
+    txt.BackgroundColor3 = Color3.fromRGB(191, 127, 255)
     txt.Text = "Loop loaded successfully, enjoy!"
     txt.TextColor3 = Color3.fromRGB(255, 255, 255)
     txt.Font = Enum.Font.GothamBold
@@ -73,7 +71,6 @@ do
     cr.CornerRadius = UDim.new(0, 16)
     cr.Parent = txt
 
-    -- Opacity fade
     spawn(function()
         local totalTime = 5
         local steps = 50
@@ -116,6 +113,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local MarketplaceService = game:GetService("MarketplaceService")
+
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 game:GetService("CoreGui").DescendantAdded:Connect(function(child)
@@ -134,6 +132,7 @@ pcall(function()
     Has2x = MarketplaceService:UserOwnsGamePassAsync(Player.UserId, 14597778)
 end)
 
+-- Hook opcional (solo si está disponible)
 if hookmetamethod and newcclosure then
     pcall(function()
         local oldMagnitude
@@ -151,6 +150,7 @@ local ItemSpawnFolder
 local folderSuccess = pcall(function()
     ItemSpawnFolder = Workspace:WaitForChild("Item_Spawns", 10):WaitForChild("Items", 10)
 end)
+
 if not folderSuccess or not ItemSpawnFolder then
     warn("Item_Spawns folder not found, retrying...")
     task.wait(5)
@@ -212,6 +212,7 @@ local MaxItemAmounts = {
     ["Steel Ball"] = 10,
     ["Dio's Diary"] = 10
 }
+
 if Has2x then
     for Index, Max in pairs(MaxItemAmounts) do
         MaxItemAmounts[Index] = Max * 2
@@ -245,6 +246,7 @@ end
 local function ServerHop()
     local TeleportService = game:GetService("TeleportService")
     local PlaceId = game.PlaceId
+    
     pcall(function()
         local HttpService = game:GetService("HttpService")
         local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
@@ -258,6 +260,8 @@ local function ServerHop()
             end
         end
     end)
+    
+    -- Backup if fail
     TeleportService:Teleport(PlaceId, Player)
 end
 
@@ -296,15 +300,17 @@ else
     warn("ItemSpawnFolder doesn't exist, items won't be detected automatically")
 end
 
+-- Anti-cheat bypass opcional
 if hookmetamethod and newcclosure then
     pcall(function()
-        local KEY = "___XP DE KEY"
+        local UzuKeeIsRetardedAndDoesntKnowHowToMakeAnAntiCheatOnTheServerSideAlsoVexStfuIKnowTheCodeIsBadYouDontNeedToTellMe = "  ___XP DE KEY"
+        
         local oldNc
         oldNc = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
             local Method = getnamecallmethod()
             local Args = {...}
             if not checkcaller() and rawequal(self.Name, "Returner") and rawequal(Args[1], "idklolbrah2de") then
-                return KEY
+                return UzuKeeIsRetardedAndDoesntKnowHowToMakeAnAntiCheatOnTheServerSideAlsoVexStfuIKnowTheCodeIsBadYouDontNeedToTellMe
             end
             return oldNc(self, ...)
         end))
@@ -312,6 +318,7 @@ if hookmetamethod and newcclosure then
 end
 
 task.wait(1)
+
 if not PlayerGui:FindFirstChild("HUD") then
     pcall(function()
         local HUD = ReplicatedStorage.Objects.HUD:Clone()
@@ -320,24 +327,34 @@ if not PlayerGui:FindFirstChild("HUD") then
 end
 
 task.spawn(function()
-    pcall(function() PlayerGui:WaitForChild("LoadingScreen1"):Destroy() end)
+    pcall(function()
+        PlayerGui:WaitForChild("LoadingScreen1"):Destroy()
+    end)
     task.wait(.5)
-    pcall(function() PlayerGui:WaitForChild("LoadingScreen"):Destroy() end)
-    pcall(function() workspace.LoadingScreen.Song:Destroy() end)
+    pcall(function()
+        PlayerGui:WaitForChild("LoadingScreen"):Destroy()
+    end)
+    pcall(function()
+        workspace.LoadingScreen.Song:Destroy()
+    end)
 end)
 
-repeat task.wait() until GetCharacter() and GetCharacter("RemoteEvent")
+repeat 
+    task.wait() 
+until GetCharacter() and GetCharacter("RemoteEvent")
 print("Character loaded successfully")
 GetCharacter("RemoteEvent"):FireServer("PressedPlay")
 print("Attempting teleport...")
 TeleportTo(CFrame.new(978, -42, -49))
 task.wait(1)
+
 local HRP = GetCharacter("HumanoidRootPart")
 if HRP then
     print("Current position: " .. tostring(HRP.Position))
 else
     warn("ERROR: HumanoidRootPart not found")
 end
+
 print("Waiting 5 seconds before starting farm...")
 task.wait(5)
 print("Starting autofarm loop...")
@@ -345,8 +362,9 @@ print("Starting autofarm loop...")
 local cyclesCompleted = 0
 local maxCycles = 1
 local maxCycleTime = 60
-local notifiedMoney = false
 
+-- WEBHOOK NOTIFY FUNCTION
+local notifiedMoney = false
 local function SendWebhook(message)
     if WebhookURL and WebhookURL ~= "" then
         pcall(function()
@@ -367,7 +385,7 @@ end
 
 while true do
     print("=== Cycle #" .. (cyclesCompleted + 1) .. " ===")
-    -- Farming items
+    -- Farmear items
     for Index, ItemInfo in pairs(getgenv().SpawnedItems) do
         local HumanoidRootPart = GetCharacter("HumanoidRootPart")
         if HumanoidRootPart then
@@ -383,6 +401,7 @@ while true do
                 ToggleNoclip(true)
                 TeleportTo(CFrame.new(Position.X, Position.Y + 25, Position.Z))
                 task.wait(.5)
+
                 if fireproximityprompt then
                     fireproximityprompt(ProximityPrompt)
                 else
@@ -390,6 +409,7 @@ while true do
                     task.wait(ProximityPrompt.HoldDuration or 0.5)
                     ProximityPrompt:InputHoldEnd()
                 end
+
                 task.wait(.5)
                 BodyVelocity:Destroy()
                 TeleportTo(CFrame.new(978, -42, -49))
@@ -398,8 +418,8 @@ while true do
             end
         end
     end
-    task.wait(3)
 
+    task.wait(3)
     local cycleStartTime = tick()
     print("Farm finished, starting sell and buy checks...")
 
@@ -429,7 +449,7 @@ while true do
     end
 
     -- Buy Lucky Arrows
-    Money = Player.PlayerStats.Money
+    local Money = Player.PlayerStats.Money
     if BuyLucky and not HasLuckyArrows() then
         print("Buying Lucky Arrows... (Money: $" .. Money.Value .. ")")
         local purchaseAttempts = 0
@@ -439,6 +459,7 @@ while true do
             end)
             task.wait(1)
             purchaseAttempts = purchaseAttempts + 1
+
             local currentCount = 0
             for _, Tool in pairs(Player.Backpack:GetChildren()) do
                 if Tool.Name == "Lucky Arrow" then
@@ -452,12 +473,14 @@ while true do
                     end
                 end
             end
+
             print("Lucky Arrows: " .. currentCount .. "/10")
             if currentCount >= 10 then
                 SendWebhook("🏹 MAX LUCKY ARROWS REACHED! Total: " .. currentCount .. "/10")
                 print("Max Lucky Arrows reached!")
                 break
             end
+
             if purchaseAttempts > 3 and currentCount == 9 then
                 print("⚠️ Could not buy the tenth Lucky Arrow")
                 break
@@ -467,17 +490,20 @@ while true do
 
     cyclesCompleted = cyclesCompleted + 1
     print("Cycle completed (" .. cyclesCompleted .. "/" .. maxCycles .. ")")
+
     if tick() - cycleStartTime > maxCycleTime then
         print("⚠️ TIMEOUT: Forcing server hop...")
         cyclesCompleted = 0
         ServerHop()
         task.wait(10)
     end
+
     if cyclesCompleted >= maxCycles then
         print("=== " .. maxCycles .. " cycles completed, hopping server ===")
         cyclesCompleted = 0
         ServerHop()
         task.wait(10)
     end
+
     task.wait(2)
 end
