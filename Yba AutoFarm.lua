@@ -69,7 +69,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local MarketplaceService = game:GetService("MarketplaceService")
 
-local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 game:GetService("CoreGui").DescendantAdded:Connect(function(child)
@@ -83,21 +82,23 @@ game:GetService("CoreGui").DescendantAdded:Connect(function(child)
     end
 end)
 
-local Has2x = MarketplaceService:UserOwnsGamePassAsync(Player.UserId, 14597778)
-
-local oldMagnitude
-local hookSuccess = pcall(function()
-    oldMagnitude = hookmetamethod(Vector3.new(), "__index", newcclosure(function(self, index)
-        local CallingScript = tostring(getcallingscript())
-        if not checkcaller() and index == "magnitude" and CallingScript == "ItemSpawn" then
-            return 0
-        end
-        return oldMagnitude(self, index)
-    end))
+local Has2x = false
+pcall(function()
+    Has2x = MarketplaceService:UserOwnsGamePassAsync(Player.UserId, 14597778)
 end)
 
-if not hookSuccess then
-    warn("Hook falló, continuando sin él...")
+-- Hook opcional (solo si está disponible)
+if hookmetamethod and newcclosure then
+    pcall(function()
+        local oldMagnitude
+        oldMagnitude = hookmetamethod(Vector3.new(), "__index", newcclosure(function(self, index)
+            local CallingScript = tostring(getcallingscript())
+            if not checkcaller() and index == "magnitude" and CallingScript == "ItemSpawn" then
+                return 0
+            end
+            return oldMagnitude(self, index)
+        end))
+    end)
 end
 
 local ItemSpawnFolder
@@ -199,10 +200,10 @@ end
 
 local function ServerHop()
     local TeleportService = game:GetService("TeleportService")
-    local HttpService = game:GetService("HttpService")
     local PlaceId = game.PlaceId
     
-    local success, result = pcall(function()
+    pcall(function()
+        local HttpService = game:GetService("HttpService")
         local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
         if servers and servers.data then
             for _, server in pairs(servers.data) do
@@ -215,15 +216,14 @@ local function ServerHop()
         end
     end)
     
-    if not success then
-        warn("Error en server hop, reintentando con teleport simple...")
-        TeleportService:Teleport(PlaceId, Player)
-    end
+    -- Backup si falla
+    TeleportService:Teleport(PlaceId, Player)
 end
 
 local function GetItemInfo(Model)
     if Model and Model:IsA("Model") and Model.Parent and Model.Parent.Name == "Items" then
         local PrimaryPart = Model.PrimaryPart
+        if not PrimaryPart then return nil end
         local Position = PrimaryPart.Position
         local ProximityPrompt
         for _, ItemInstance in pairs(Model:GetChildren()) do
@@ -255,27 +255,36 @@ else
     warn("ItemSpawnFolder no existe, no se detectarán items automáticamente")
 end
 
-local UzuKeeIsRetardedAndDoesntKnowHowToMakeAnAntiCheatOnTheServerSideAlsoVexStfuIKnowTheCodeIsBadYouDontNeedToTellMe = "  ___XP DE KEY"
-
-local oldNc
-oldNc = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-    local Method = getnamecallmethod()
-    local Args = {...}
-    if not checkcaller() and rawequal(self.Name, "Returner") and rawequal(Args[1], "idklolbrah2de") then
-        return UzuKeeIsRetardedAndDoesntKnowHowToMakeAnAntiCheatOnTheServerSideAlsoVexStfuIKnowTheCodeIsBadYouDontNeedToTellMe
-    end
-    return oldNc(self, ...)
-end))
+-- Anti-cheat bypass opcional
+if hookmetamethod and newcclosure then
+    pcall(function()
+        local UzuKeeIsRetardedAndDoesntKnowHowToMakeAnAntiCheatOnTheServerSideAlsoVexStfuIKnowTheCodeIsBadYouDontNeedToTellMe = "  ___XP DE KEY"
+        
+        local oldNc
+        oldNc = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+            local Method = getnamecallmethod()
+            local Args = {...}
+            if not checkcaller() and rawequal(self.Name, "Returner") and rawequal(Args[1], "idklolbrah2de") then
+                return UzuKeeIsRetardedAndDoesntKnowHowToMakeAnAntiCheatOnTheServerSideAlsoVexStfuIKnowTheCodeIsBadYouDontNeedToTellMe
+            end
+            return oldNc(self, ...)
+        end))
+    end)
+end
 
 task.wait(1)
 
 if not PlayerGui:FindFirstChild("HUD") then
-    local HUD = ReplicatedStorage.Objects.HUD:Clone()
-    HUD.Parent = PlayerGui
+    pcall(function()
+        local HUD = ReplicatedStorage.Objects.HUD:Clone()
+        HUD.Parent = PlayerGui
+    end)
 end
 
 task.spawn(function()
-    PlayerGui:WaitForChild("LoadingScreen1"):Destroy()
+    pcall(function()
+        PlayerGui:WaitForChild("LoadingScreen1"):Destroy()
+    end)
     task.wait(.5)
     pcall(function()
         PlayerGui:WaitForChild("LoadingScreen"):Destroy()
@@ -309,7 +318,7 @@ print("Iniciando loop de farmeo...")
 
 local cyclesCompleted = 0
 local maxCycles = 1
-local maxCycleTime = 60 -- 1 minuto máximo después de farmear antes de forzar hop
+local maxCycleTime = 60
 
 while true do
     print("=== Ciclo #" .. (cyclesCompleted + 1) .. " ===")
@@ -330,7 +339,17 @@ while true do
                 ToggleNoclip(true)
                 TeleportTo(CFrame.new(Position.X, Position.Y + 25, Position.Z))
                 task.wait(.5)
-                fireproximityprompt(ProximityPrompt)
+                
+                -- Usar fireproximityprompt si está disponible
+                if fireproximityprompt then
+                    fireproximityprompt(ProximityPrompt)
+                else
+                    -- Alternativa si no está disponible
+                    ProximityPrompt:InputHoldBegin()
+                    task.wait(ProximityPrompt.HoldDuration or 0.5)
+                    ProximityPrompt:InputHoldEnd()
+                end
+                
                 task.wait(.5)
                 BodyVelocity:Destroy()
                 TeleportTo(CFrame.new(978, -42, -49))
@@ -342,7 +361,6 @@ while true do
     
     task.wait(3)
     
-    -- *** AQUÍ EMPIEZA EL TIMEOUT ***
     local cycleStartTime = tick()
     print("Farmeo completado, iniciando venta y compra...")
     
@@ -350,35 +368,37 @@ while true do
     if AutoSell then
         for Item, Sell in pairs(SellItems) do
             if Sell and Player.Backpack and Player.Backpack:FindFirstChild(Item) then
-                GetCharacter("Humanoid"):EquipTool(Player.Backpack:FindFirstChild(Item))
-                GetCharacter("RemoteEvent"):FireServer("EndDialogue", {
-                    ["NPC"] = "Merchant",
-                    ["Dialogue"] = "Dialogue5",
-                    ["Option"] = "Option2"
-                })
+                pcall(function()
+                    GetCharacter("Humanoid"):EquipTool(Player.Backpack:FindFirstChild(Item))
+                    GetCharacter("RemoteEvent"):FireServer("EndDialogue", {
+                        ["NPC"] = "Merchant",
+                        ["Dialogue"] = "Dialogue5",
+                        ["Option"] = "Option2"
+                    })
+                end)
                 task.wait(.1)
             end
         end
     end
     
-    -- Comprar Lucky Arrows si no tiene el máximo
+    -- Comprar Lucky Arrows
     local Money = Player.PlayerStats.Money
     if BuyLucky and not HasLuckyArrows() then
         print("Comprando Lucky Arrows... (Dinero: $" .. Money.Value .. ")")
         local purchaseAttempts = 0
         while Money.Value >= 75000 and purchaseAttempts < 15 do
-            Player.Character.RemoteEvent:FireServer("PurchaseShopItem", {["ItemName"] = "1x Lucky Arrow"})
-            task.wait(1) -- Aumentado a 1 segundo para evitar problemas
+            pcall(function()
+                Player.Character.RemoteEvent:FireServer("PurchaseShopItem", {["ItemName"] = "1x Lucky Arrow"})
+            end)
+            task.wait(1)
             purchaseAttempts = purchaseAttempts + 1
             
-            -- Contar Lucky Arrows actuales (revisar Backpack Y Character)
             local currentCount = 0
             for _, Tool in pairs(Player.Backpack:GetChildren()) do
                 if Tool.Name == "Lucky Arrow" then
                     currentCount = currentCount + 1
                 end
             end
-            -- Verificar si hay una equipada
             if Player.Character then
                 for _, Tool in pairs(Player.Character:GetChildren()) do
                     if Tool:IsA("Tool") and Tool.Name == "Lucky Arrow" then
@@ -394,41 +414,28 @@ while true do
                 break
             end
             
-            -- Si ya intentó varias veces y sigue sin cambiar, salir
             if purchaseAttempts > 3 and currentCount == 9 then
-                print("⚠️ No se pudo comprar la décima Lucky Arrow (posible bug del juego)")
+                print("⚠️ No se pudo comprar la décima Lucky Arrow")
                 break
             end
         end
     end
     
-    -- Incrementar contador de ciclos
     cyclesCompleted = cyclesCompleted + 1
     print("Ciclo completado (" .. cyclesCompleted .. "/" .. maxCycles .. ")")
     
-    -- Verificar timeout del ciclo (si se quedó atascado)
     if tick() - cycleStartTime > maxCycleTime then
-        print("⚠️ TIMEOUT: Ciclo tardó demasiado, forzando server hop...")
+        print("⚠️ TIMEOUT: Forzando server hop...")
         cyclesCompleted = 0
         ServerHop()
         task.wait(10)
     end
     
-    -- Verificar si debe cambiar de servidor
     if cyclesCompleted >= maxCycles then
         print("=== " .. maxCycles .. " ciclos completados, cambiando de servidor ===")
         cyclesCompleted = 0
-        local hopStartTime = tick()
         ServerHop()
         task.wait(10)
-        
-        -- Si después de 15 segundos sigue en el mismo servidor, reintentar
-        if tick() - hopStartTime < 15 then
-            print("⚠️ Server hop falló, reintentando...")
-            task.wait(5)
-            ServerHop()
-            task.wait(10)
-        end
     end
     
     task.wait(2)
