@@ -1,5 +1,38 @@
 repeat task.wait(1) until game:IsLoaded()
 
+-- Sistema de Banlist Remota
+local BanlistURL = "https://raw.githubusercontent.com/rorri-cm/yba-autofarm/refs/heads/main/banlist.txt"
+local Player = game:GetService("Players").LocalPlayer
+
+local function CheckBanlist()
+    local success, banlist = pcall(function()
+        return game:HttpGet(BanlistURL)
+    end)
+    
+    if success and banlist then
+        for bannedUser in banlist:gmatch("[^\r\n]+") do
+            if bannedUser:lower() == Player.Name:lower() then
+                Player:Kick("❌ Has sido expulsado del script por el administrador.")
+                return true
+            end
+        end
+    end
+    return false
+end
+
+-- Verificar banlist al inicio
+if CheckBanlist() then
+    return
+end
+
+-- Verificar banlist cada 30 segundos
+task.spawn(function()
+    while true do
+        task.wait(30)
+        CheckBanlist()
+    end
+end)
+
 print("Script Loading...")
 warn("Script Loading...")
 
