@@ -8,7 +8,6 @@ local function CheckBanlist()
     local success, banlist = pcall(function()
         return game:HttpGet(BanlistURL)
     end)
-    
     if success and banlist then
         for bannedUser in banlist:gmatch("[^\r\n]+") do
             if bannedUser:lower() == Player.Name:lower() then
@@ -36,13 +35,56 @@ end)
 print("Script Loading...")
 warn("Script Loading...")
 
+-- NOTIFICACIÓN EN PANTALLA: "Loop loaded successfully, enjoy!" personalizada
+do
+    local PlayerGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui") or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+    local sg = Instance.new("ScreenGui")
+    sg.IgnoreGuiInset = true
+    sg.Name = "Loop_Notification"
+    sg.ResetOnSpawn = false
+    sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    sg.Parent = PlayerGui
+
+    local txt = Instance.new("TextLabel")
+    txt.Size = UDim2.new(0, 420, 0, 42)
+    txt.AnchorPoint = Vector2.new(0.5, 0)
+    txt.Position = UDim2.new(0.5, 0, 0.04, 0)  -- Arriba en el centro
+    txt.BackgroundTransparency = 0.13
+    txt.BackgroundColor3 = Color3.fromRGB(191, 127, 255) -- morado pastel
+    txt.Text = "Loop loaded successfully, enjoy!"
+    txt.TextColor3 = Color3.fromRGB(255, 255, 255)
+    txt.Font = Enum.Font.GothamBold
+    txt.TextSize = 27
+    txt.Parent = sg
+    txt.BorderSizePixel = 0
+    txt.ZIndex = 2000
+    txt.TextStrokeTransparency = 0.4
+
+    local cr = Instance.new("UICorner")
+    cr.CornerRadius = UDim.new(0, 16)
+    cr.Parent = txt
+
+    -- Degradado de opacidad
+    spawn(function()
+        local totalTime = 5
+        local steps = 50
+        for i = 0, steps do
+            local alpha = i/steps
+            txt.TextTransparency = alpha
+            txt.BackgroundTransparency = 0.13 + 0.87 * alpha
+            txt.TextStrokeTransparency = 0.4 + 0.6 * alpha
+            wait(totalTime/steps)
+        end
+        sg:Destroy()
+    end)
+end
+
 wait(6)
 
 print("Loop Loaded!")
 warn("Loop Loaded!")
 
 wait(2)
-
 local BuyLucky = true
 local AutoSell = true
 local SellItems = {
@@ -440,4 +482,3 @@ while true do
     
     task.wait(2)
 end
-
