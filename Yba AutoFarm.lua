@@ -1,9 +1,20 @@
--- CONFIG - USER FRIENDLY (add ABOVE all the rest when using raw!)
-local _cfg = getgenv and getgenv().Config or {}
-local BuyLucky = (_cfg.BuyLucky ~= nil) and _cfg.BuyLucky or true
-local AutoSell = (_cfg.AutoSell ~= nil) and _cfg.AutoSell or true
-local WebhookURL = (_cfg.Webhook ~= nil) and _cfg.Webhook or ""
-local MaxMoneyAlert = (_cfg.MaxMoneyAlert ~= nil) and _cfg.MaxMoneyAlert or 1000000
+-- ==== INTERNAL AUTO-RESOLVING CONFIG ACCESSORS ====
+local function IsBuyLucky()
+    return (getgenv and getgenv().Config and getgenv().Config.BuyLucky ~= nil)
+        and getgenv().Config.BuyLucky or true
+end
+local function IsAutoSell()
+    return (getgenv and getgenv().Config and getgenv().Config.AutoSell ~= nil)
+        and getgenv().Config.AutoSell or true
+end
+local function GetWebhookURL()
+    return (getgenv and getgenv().Config and getgenv().Config.Webhook ~= nil)
+        and getgenv().Config.Webhook or ""
+end
+local function GetMaxMoneyAlert()
+    return (getgenv and getgenv().Config and getgenv().Config.MaxMoneyAlert ~= nil)
+        and getgenv().Config.MaxMoneyAlert or 1000000
+end
 
 repeat task.wait(1) until game:IsLoaded()
 
@@ -26,12 +37,10 @@ local function CheckBanlist()
     return false
 end
 
--- Verificar banlist al inicio
 if CheckBanlist() then
     return
 end
 
--- Verificar banlist cada 30 segundos
 task.spawn(function()
     while true do
         task.wait(30)
@@ -42,7 +51,7 @@ end)
 print("Script Loading...")
 warn("Script Loading...")
 
--- NOTIFICACIÓN EN PANTALLA: "Loop loaded successfully, enjoy!" personalizada
+-- NOTIFICATION ON SCREEN: "Loop loaded successfully, enjoy!"
 do
     local PlayerGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui") or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
     local sg = Instance.new("ScreenGui")
@@ -132,7 +141,7 @@ pcall(function()
     Has2x = MarketplaceService:UserOwnsGamePassAsync(Player.UserId, 14597778)
 end)
 
--- Hook opcional (solo si está disponible)
+-- Hook opcional (no se toca tu farmeo)
 if hookmetamethod and newcclosure then
     pcall(function()
         local oldMagnitude
@@ -246,7 +255,7 @@ end
 local function ServerHop()
     local TeleportService = game:GetService("TeleportService")
     local PlaceId = game.PlaceId
-    
+
     pcall(function()
         local HttpService = game:GetService("HttpService")
         local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
@@ -260,8 +269,7 @@ local function ServerHop()
             end
         end
     end)
-    
-    -- Backup if fail
+
     TeleportService:Teleport(PlaceId, Player)
 end
 
@@ -300,11 +308,10 @@ else
     warn("ItemSpawnFolder doesn't exist, items won't be detected automatically")
 end
 
--- Anti-cheat bypass opcional
 if hookmetamethod and newcclosure then
     pcall(function()
         local UzuKeeIsRetardedAndDoesntKnowHowToMakeAnAntiCheatOnTheServerSideAlsoVexStfuIKnowTheCodeIsBadYouDontNeedToTellMe = "  ___XP DE KEY"
-        
+
         local oldNc
         oldNc = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
             local Method = getnamecallmethod()
@@ -339,9 +346,7 @@ task.spawn(function()
     end)
 end)
 
-repeat 
-    task.wait() 
-until GetCharacter() and GetCharacter("RemoteEvent")
+repeat task.wait() until GetCharacter() and GetCharacter("RemoteEvent")
 print("Character loaded successfully")
 GetCharacter("RemoteEvent"):FireServer("PressedPlay")
 print("Attempting teleport...")
@@ -366,7 +371,8 @@ local maxCycleTime = 60
 -- WEBHOOK NOTIFY FUNCTION
 local notifiedMoney = false
 local function SendWebhook(message)
-    if WebhookURL and WebhookURL ~= "" then
+    local url = GetWebhookURL()
+    if url and url ~= "" then
         pcall(function()
             local HttpService = game:GetService("HttpService")
             local data = {
@@ -374,7 +380,7 @@ local function SendWebhook(message)
                 ["username"] = "YBA Auto Farm - " .. Player.Name
             }
             request({
-                Url = WebhookURL,
+                Url = url,
                 Method = "POST",
                 Headers = {["Content-Type"] = "application/json"},
                 Body = HttpService:JSONEncode(data)
@@ -385,7 +391,7 @@ end
 
 while true do
     print("=== Cycle #" .. (cyclesCompleted + 1) .. " ===")
-    -- Farmear items
+    -- Farmear items (NO TOCAR)
     for Index, ItemInfo in pairs(getgenv().SpawnedItems) do
         local HumanoidRootPart = GetCharacter("HumanoidRootPart")
         if HumanoidRootPart then
@@ -423,16 +429,16 @@ while true do
     local cycleStartTime = tick()
     print("Farm finished, starting sell and buy checks...")
 
-    -- Money notification webhook
+    -- Money notification webhook (reads config live)
     local Money = Player.PlayerStats.Money
-    if Money.Value >= MaxMoneyAlert and not notifiedMoney then
+    if Money.Value >= GetMaxMoneyAlert() and not notifiedMoney then
         notifiedMoney = true
-        SendWebhook("💰 $" .. MaxMoneyAlert .. " REACHED! Current Money: $" .. Money.Value)
+        SendWebhook("💰 $" .. GetMaxMoneyAlert() .. " REACHED! Current Money: $" .. Money.Value)
         print("🎉 Alert: Target money reached!")
     end
 
-    -- Sell items
-    if AutoSell then
+    -- Sell items (reads user config live)
+    if IsAutoSell() then
         for Item, Sell in pairs(SellItems) do
             if Sell and Player.Backpack and Player.Backpack:FindFirstChild(Item) then
                 pcall(function()
@@ -448,9 +454,8 @@ while true do
         end
     end
 
-    -- Buy Lucky Arrows
-    local Money = Player.PlayerStats.Money
-    if BuyLucky and not HasLuckyArrows() then
+    -- Buy Lucky Arrows (reads user config live)
+    if IsBuyLucky() and not HasLuckyArrows() then
         print("Buying Lucky Arrows... (Money: $" .. Money.Value .. ")")
         local purchaseAttempts = 0
         while Money.Value >= 75000 and purchaseAttempts < 15 do
