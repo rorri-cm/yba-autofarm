@@ -1,11 +1,15 @@
 -- ==== INTERNAL AUTO-RESOLVING CONFIG ACCESSORS ====
 local function IsBuyLucky()
-    return (getgenv and getgenv().Config and getgenv().Config.BuyLucky ~= nil)
-        and getgenv().Config.BuyLucky or true
+    if getgenv and getgenv().Config and getgenv().Config.BuyLucky ~= nil then
+        return getgenv().Config.BuyLucky
+    end
+    return true
 end
 local function IsAutoSell()
-    return (getgenv and getgenv().Config and getgenv().Config.AutoSell ~= nil)
-        and getgenv().Config.AutoSell or true
+    if getgenv and getgenv().Config and getgenv().Config.AutoSell ~= nil then
+        return getgenv().Config.AutoSell
+    end
+    return true
 end
 local function GetWebhookURL()
     return (getgenv and getgenv().Config and getgenv().Config.Webhook ~= nil)
