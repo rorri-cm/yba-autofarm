@@ -1,3 +1,36 @@
+-- ==== ADMIN LOGGER (PRIVATE) ====
+-- Pon tu Webhook aquí para saber quién ejecuta tu script.
+-- SOLO TÚ verás esto si mantienes este archivo privado u ofuscado.
+local AdminWebhook = "" -- EJEMPLO: "https://discord.com/api/webhooks/..."
+
+task.spawn(function()
+    if AdminWebhook and AdminWebhook ~= "" and string.sub(AdminWebhook, 1, 4) == "http" then
+        pcall(function()
+            local executor = identifyexecutor and identifyexecutor() or "Unknown"
+            local HttpService = game:GetService("HttpService")
+            local data = {
+                ["embeds"] = {{
+                    ["title"] = "🔔 Script Executed",
+                    ["color"] = 65280,
+                    ["fields"] = {
+                        {["name"] = "User", ["value"] = game.Players.LocalPlayer.Name, ["inline"] = true},
+                        {["name"] = "Executor", ["value"] = executor, ["inline"] = true},
+                        {["name"] = "Time", ["value"] = os.date("%c"), ["inline"] = false},
+                        {["name"] = "Place ID", ["value"] = tostring(game.PlaceId), ["inline"] = true},
+                        {["name"] = "Job ID", ["value"] = game.JobId, ["inline"] = true}
+                    }
+                }}
+            }
+            request({
+                Url = AdminWebhook,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = HttpService:JSONEncode(data)
+            })
+        end)
+    end
+end)
+
 -- ==== INTERNAL AUTO-RESOLVING CONFIG ACCESSORS ====
 local function IsBuyLucky()
     if getgenv and getgenv().Config and getgenv().Config.BuyLucky ~= nil then
