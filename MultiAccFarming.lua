@@ -36,22 +36,6 @@ if SafeMode then
         settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
         game:GetService("RunService"):Set3dRenderingEnabled(false) -- Saves GPU
         setfpscap(30) -- Saves CPU
-
-        -- BLACK SCREEN OVERLAY (instead of white)
-        local PlayerGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui") or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-        local BlackScreen = Instance.new("ScreenGui")
-        BlackScreen.Name = "BlackScreenOverlay"
-        BlackScreen.IgnoreGuiInset = true
-        BlackScreen.Parent = PlayerGui
-        
-        local Frame = Instance.new("Frame")
-        Frame.Size = UDim2.new(1, 0, 1, 0)
-        Frame.BackgroundColor3 = Color3.new(0, 0, 0) -- BLACK background
-        Frame.BorderSizePixel = 0
-        Frame.Parent = BlackScreen
-        
-        -- Keep UI on top but behind essential notifications
-        BlackScreen.DisplayOrder = -1 
     end)
 end
 
@@ -131,9 +115,8 @@ do
     end)
 end
 
--- OPTIMIZED DELAYS FOR SAFE MODE (faster but safe)
-local ActionDelay = SafeMode and 0.35 or 0.1  -- Optimized: 0.5 -> 0.35
-local TeleportDelay = SafeMode and 0.7 or 0.5  -- Optimized: 1.0 -> 0.7
+local ActionDelay = SafeMode and 0.5 or 0.1
+local TeleportDelay = SafeMode and 1 or 0.5
 
 wait(6)
 print("Loop Loaded!")
@@ -518,7 +501,7 @@ while true do
         end
     end
 
-    -- Buy Lucky Arrows (reads user config live) - OPTIMIZED
+    -- Buy Lucky Arrows (reads user config live)
     if IsBuyLucky() and not HasLuckyArrows() then
         print("Buying Lucky Arrows... (Money: $" .. Money.Value .. ")")
         local purchaseAttempts = 0
@@ -526,7 +509,7 @@ while true do
             pcall(function()
                 Player.Character.RemoteEvent:FireServer("PurchaseShopItem", {["ItemName"] = "1x Lucky Arrow"})
             end)
-            task.wait(0.7) -- OPTIMIZED: 1.0 -> 0.7
+            task.wait(1)
             purchaseAttempts = purchaseAttempts + 1
 
             local currentCount = 0
