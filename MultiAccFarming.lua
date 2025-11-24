@@ -409,6 +409,36 @@ task.wait(5)
 print("Starting autofarm loop...")
 
 local cyclesCompleted = 0
+local maxCycles = 1
+local maxCycleTime = 60
+
+-- WEBHOOK NOTIFY FUNCTION
+local notifiedMoney = false
+local function SendWebhook(message)
+    local url = GetWebhookURL()
+    if url and url ~= "" then
+        pcall(function()
+            local HttpService = game:GetService("HttpService")
+            -- Include username in the content for better visibility
+            local finalMessage = "**[" .. Player.Name .. "]** " .. message
+            local data = {
+                ["content"] = finalMessage,
+                ["username"] = "YBA Auto Farm"
+            }
+            request({
+                Url = url,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = HttpService:JSONEncode(data)
+            })
+        end)
+    end
+end
+
+while true do
+    task.wait(0.1) -- Prevent CPU lockup
+    print("=== Cycle #" .. (cyclesCompleted + 1) .. " ===")
+    -- Farmear items (NO TOCAR)
     for Index, ItemInfo in pairs(getgenv().SpawnedItems) do
         local HumanoidRootPart = GetCharacter("HumanoidRootPart")
         if HumanoidRootPart then
