@@ -20,7 +20,7 @@ local function GetMaxMoneyAlert()
         and getgenv().Config.MaxMoneyAlert or 1000000
 end
 
--- ✅ REMOVED: SafeMode optimization (3D rendering, FPS cap, quality)
+--  REMOVED: SafeMode optimization (3D rendering, FPS cap, quality)
 
 if not game:IsLoaded() then
     game.Loaded:Wait()
@@ -111,7 +111,7 @@ print("Loop Loaded!")
 warn("Loop Loaded!")
 wait(2)
 
--- ✅ MODIFIED: Only Rokakakas and Arrows
+--  MODIFIED: Only Rokakakas and Arrows
 local SellItems = {
     ["Rokakaka"] = false,
     ["Mysterious Arrow"] = false,
@@ -196,7 +196,7 @@ TeleportService.TeleportInitFailed:Connect(function(player, teleportResult, erro
     end
 end)
 
-print("✅ Auto-Rejoin system loaded (4 detection methods active)")
+print(" Auto-Rejoin system loaded (4 detection methods active)")
 
 
 
@@ -268,7 +268,7 @@ local function ToggleNoclip(Value)
     end
 end
 
--- ✅ MODIFIED: Only Rokakakas and Arrows (stop at 10 each)
+--  MODIFIED: Only Rokakakas and Arrows (stop at 10 each)
 local MaxItemAmounts = {
     ["Rokakaka"] = 10,
     ["Mysterious Arrow"] = 10
@@ -304,7 +304,7 @@ local function HasLuckyArrows()
     return Count >= 10
 end
 
--- ✅ REMOVED: ServerHop function completely removed
+--  REMOVED: ServerHop function completely removed
 
 local function GetItemInfo(Model)
     if Model and Model:IsA("Model") and Model.Parent and Model.Parent.Name == "Items" then
@@ -332,7 +332,7 @@ if ItemSpawnFolder then
         if Model:IsA("Model") then
             local ItemInfo = GetItemInfo(Model)
             if ItemInfo then
-                -- ✅ MODIFIED: Only track Rokakakas and Arrows
+                --  MODIFIED: Only track Rokakakas and Arrows
                 if ItemInfo.Name == "Rokakaka" or ItemInfo.Name == "Mysterious Arrow" then
                     getgenv().SpawnedItems[Model] = ItemInfo
                     print("Detected item: " .. ItemInfo.Name)
@@ -420,7 +420,7 @@ print("Waiting 5 seconds before starting farm...")
 task.wait(5)
 print("Starting autofarm loop...")
 
--- ✅ REMOVED: cyclesCompleted, maxCycles, maxCycleTime variables
+--  REMOVED: cyclesCompleted, maxCycles, maxCycleTime variables
 
 -- WEBHOOK NOTIFY FUNCTION
 local notifiedMoney = false
@@ -445,7 +445,7 @@ local function SendWebhook(message)
     end
 end
 
--- ✅ MODIFIED: Loop until 10 Rokas and 10 Arrows are collected
+--  MODIFIED: Loop until 10 Rokas and 10 Arrows are collected
 while true do
     task.wait(0.1) -- Prevent CPU lockup
     
@@ -531,9 +531,10 @@ while true do
     end
 
 
-    -- ✅ REMOVED: Lucky Arrow purchase logic
+    --  REMOVED: Lucky Arrow purchase logic
 
-    -- ✅ REMOVED: All cycle completion and server hop logic
+    --  REMOVED: All cycle completion and server hop logic
 
     task.wait(2)
 end
+
