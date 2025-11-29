@@ -20,7 +20,7 @@ local function GetMaxMoneyAlert()
         and getgenv().Config.MaxMoneyAlert or 1000000
 end
 
--- âœ… REMOVED: SafeMode optimization (3D rendering, FPS cap, quality)
+-- ✅ REMOVED: SafeMode optimization (3D rendering, FPS cap, quality)
 
 if not game:IsLoaded() then
     game.Loaded:Wait()
@@ -37,7 +37,7 @@ local function CheckBanlist()
     if success and banlist then
         for bannedUser in banlist:gmatch("[^\r\n]+") do
             if bannedUser:lower() == Player.Name:lower() then
-                Player:Kick("âŒ You have been kicked from the script by the administrator.")
+                Player:Kick("❌ You have been kicked from the script by the administrator.")
                 return true
             end
         end
@@ -111,7 +111,7 @@ print("Loop Loaded!")
 warn("Loop Loaded!")
 wait(2)
 
--- âœ… MODIFIED: Only Rokakakas and Arrows
+-- ✅ MODIFIED: Only Rokakakas and Arrows
 local SellItems = {
     ["Rokakaka"] = false,
     ["Mysterious Arrow"] = false,
@@ -138,8 +138,8 @@ game:GetService("CoreGui").DescendantAdded:Connect(function(child)
         if GrabError then
             repeat task.wait() until GrabError.Text ~= "Label"
             local Reason = GrabError.Text
-            print("âš ï¸ Kick detected: " .. Reason)
-            print("ðŸ"„ Auto-rejoining in 2 seconds...")
+            print("⚠️ Kick detected: " .. Reason)
+            print("🔄 Auto-rejoining in 2 seconds...")
             task.wait(2)
             TeleportService:Teleport(PlaceId, Player)
         end
@@ -156,11 +156,11 @@ if hookmetamethod then
             
             if method == "Kick" and self == Player then
                 local reason = args[1] or "Unknown reason"
-                print("âš ï¸ Kick detected via Kick(): " .. tostring(reason))
+                print("⚠️ Kick detected via Kick(): " .. tostring(reason))
                 
                 -- Don't rejoin if it's the banlist kick
                 if not tostring(reason):match("administrator") then
-                    print("ðŸ"„ Auto-rejoining in 2 seconds...")
+                    print("🔄 Auto-rejoining in 2 seconds...")
                     task.wait(2)
                     TeleportService:Teleport(PlaceId, Player)
                 end
@@ -178,8 +178,8 @@ pcall(function()
     game:GetService("GuiService").ErrorMessageChanged:Connect(function()
         local errorMessage = game:GetService("GuiService"):GetErrorMessage()
         if errorMessage and errorMessage ~= "" then
-            print("âš ï¸ Connection error detected: " .. errorMessage)
-            print("ðŸ"„ Auto-rejoining in 2 seconds...")
+            print("⚠️ Connection error detected: " .. errorMessage)
+            print("🔄 Auto-rejoining in 2 seconds...")
             task.wait(2)
             TeleportService:Teleport(PlaceId, Player)
         end
@@ -189,14 +189,14 @@ end)
 -- Method 4: Teleport failed detection (backup)
 TeleportService.TeleportInitFailed:Connect(function(player, teleportResult, errorMessage)
     if player == Player then
-        warn("âš ï¸ Teleport failed: " .. tostring(errorMessage))
-        print("ðŸ"„ Retrying teleport in 3 seconds...")
+        warn("⚠️ Teleport failed: " .. tostring(errorMessage))
+        print("🔄 Retrying teleport in 3 seconds...")
         task.wait(3)
         TeleportService:Teleport(PlaceId, Player)
     end
 end)
 
-print("[SUCCESS] Auto-Rejoin system loaded (4 detection methods active)")
+print("✅ Auto-Rejoin system loaded (4 detection methods active)")
 
 
 
@@ -268,7 +268,7 @@ local function ToggleNoclip(Value)
     end
 end
 
--- âœ… MODIFIED: Only Rokakakas and Arrows (stop at 10 each)
+-- ✅ MODIFIED: Only Rokakakas and Arrows (stop at 10 each)
 local MaxItemAmounts = {
     ["Rokakaka"] = 10,
     ["Mysterious Arrow"] = 10
@@ -304,7 +304,7 @@ local function HasLuckyArrows()
     return Count >= 10
 end
 
--- âœ… REMOVED: ServerHop function completely removed
+-- ✅ REMOVED: ServerHop function completely removed
 
 local function GetItemInfo(Model)
     if Model and Model:IsA("Model") and Model.Parent and Model.Parent.Name == "Items" then
@@ -332,7 +332,7 @@ if ItemSpawnFolder then
         if Model:IsA("Model") then
             local ItemInfo = GetItemInfo(Model)
             if ItemInfo then
-                -- âœ… MODIFIED: Only track Rokakakas and Arrows
+                -- ✅ MODIFIED: Only track Rokakakas and Arrows
                 if ItemInfo.Name == "Rokakaka" or ItemInfo.Name == "Mysterious Arrow" then
                     getgenv().SpawnedItems[Model] = ItemInfo
                     print("Detected item: " .. ItemInfo.Name)
@@ -420,7 +420,7 @@ print("Waiting 5 seconds before starting farm...")
 task.wait(5)
 print("Starting autofarm loop...")
 
--- âœ… REMOVED: cyclesCompleted, maxCycles, maxCycleTime variables
+-- ✅ REMOVED: cyclesCompleted, maxCycles, maxCycleTime variables
 
 -- WEBHOOK NOTIFY FUNCTION
 local notifiedMoney = false
@@ -445,7 +445,7 @@ local function SendWebhook(message)
     end
 end
 
--- âœ… MODIFIED: Loop until 10 Rokas and 10 Arrows are collected
+-- ✅ MODIFIED: Loop until 10 Rokas and 10 Arrows are collected
 while true do
     task.wait(0.1) -- Prevent CPU lockup
     
@@ -461,37 +461,29 @@ while true do
     end
     
     if rokaCount >= 10 and arrowCount >= 10 then
-        print("[SUCCESS] TARGET REACHED! Rokas: " .. rokaCount .. "/10 | Arrows: " .. arrowCount .. "/10")
-        print("[SUCCESS] Farming complete! Script stopped.")
-        SendWebhook("[SUCCESS] Farming complete! Rokas: " .. rokaCount .. " | Arrows: " .. arrowCount)
+        print("✅ TARGET REACHED! Rokas: " .. rokaCount .. "/10 | Arrows: " .. arrowCount .. "/10")
+        print("🎉 Farming complete! Script stopped.")
+        SendWebhook("✅ Farming complete! Rokas: " .. rokaCount .. " | Arrows: " .. arrowCount)
         break -- Stop the loop
     end
     
     print("=== Farming Rokas & Arrows === (Rokas: " .. rokaCount .. "/10 | Arrows: " .. arrowCount .. "/10)")
-    -- Farmear items (NO TOCAR)
+    
+    -- ✅ FIXED: Collect items to remove FIRST, then remove them AFTER iteration
+    local itemsToRemove = {}
+    
     for Index, ItemInfo in pairs(getgenv().SpawnedItems) do
         local HumanoidRootPart = GetCharacter("HumanoidRootPart")
         if HumanoidRootPart then
             local Name = ItemInfo.Name
-            
-            -- âœ… FILTRO SIMPLE: Solo farmear Rokas y Arrows
-            if Name == "Rokakaka" or Name == "Mysterious Arrow" then
-    local HasMax = HasMaxItem(Name)
-    if not HasMax then
-        -- ... resto del código de farmeo
-    else
-        table.remove(getgenv().SpawnedItems, table.find(getgenv().SpawnedItems, ItemInfo))
-    end
-else
-    -- No es Roka ni Arrow, remover de la lista
-    table.remove(getgenv().SpawnedItems, table.find(getgenv().SpawnedItems, ItemInfo))
-end
-            
             local HasMax = HasMaxItem(Name)
             if not HasMax then
                 local ProximityPrompt = ItemInfo.ProximityPrompt
                 local Position = ItemInfo.Position
-                table.remove(getgenv().SpawnedItems, table.find(getgenv().SpawnedItems, ItemInfo))
+                
+                -- Mark for removal (will remove after loop)
+                table.insert(itemsToRemove, Index)
+                
                 local BodyVelocity = Instance.new("BodyVelocity")
                 BodyVelocity.Parent = HumanoidRootPart
                 BodyVelocity.Velocity = Vector3.new(0, 0, 0)
@@ -511,9 +503,15 @@ end
                 BodyVelocity:Destroy()
                 TeleportTo(CFrame.new(978, -42, -49))
             else
-                table.remove(getgenv().SpawnedItems, table.find(getgenv().SpawnedItems, ItemInfo))
+                -- Mark for removal (already have max)
+                table.insert(itemsToRemove, Index)
             end
         end
+    end
+    
+    -- ✅ FIXED: Remove items AFTER iteration (SpawnedItems is a dictionary, use Index as key)
+    for _, Index in ipairs(itemsToRemove) do
+        getgenv().SpawnedItems[Index] = nil
     end
 
     task.wait(3)
@@ -523,8 +521,8 @@ end
     local Money = Player.PlayerStats.Money
     if Money.Value >= GetMaxMoneyAlert() and not notifiedMoney then
         notifiedMoney = true
-        SendWebhook("[MONEY] reached MAX MONEY! ($" .. GetMaxMoneyAlert() .. ")")
-        print("[MONEY] Alert: Target money reached!")
+        SendWebhook("💰 reached MAX MONEY! ($" .. GetMaxMoneyAlert() .. ")")
+        print("🎉 Alert: Target money reached!")
     end
 
     -- Sell items (reads user config live)
@@ -545,10 +543,9 @@ end
     end
 
 
-    -- âœ… REMOVED: Lucky Arrow purchase logic
+    -- ✅ REMOVED: Lucky Arrow purchase logic
 
-    -- âœ… REMOVED: All cycle completion and server hop logic
+    -- ✅ REMOVED: All cycle completion and server hop logic
 
     task.wait(2)
 end
-
