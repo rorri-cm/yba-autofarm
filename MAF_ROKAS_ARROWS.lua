@@ -340,6 +340,22 @@ if ItemSpawnFolder then
             end
         end
     end)
+    
+    -- ✅ ADDED: Scan for items that already exist in the world
+    print("Scanning for existing items...")
+    for _, Model in pairs(ItemSpawnFolder:GetChildren()) do
+        if Model:IsA("Model") then
+            local ItemInfo = GetItemInfo(Model)
+            if ItemInfo then
+                -- ✅ FILTER: Only track Rokakakas and Arrows
+                if ItemInfo.Name == "Rokakaka" or ItemInfo.Name == "Mysterious Arrow" then
+                    getgenv().SpawnedItems[Model] = ItemInfo
+                    print("Found existing item: " .. ItemInfo.Name)
+                end
+            end
+        end
+    end
+    print("Initial scan complete!")
 else
     warn("ItemSpawnFolder doesn't exist, items won't be detected automatically")
 end
@@ -462,9 +478,29 @@ while true do
     
     if rokaCount >= 10 and arrowCount >= 10 then
         print("✅ TARGET REACHED! Rokas: " .. rokaCount .. "/10 | Arrows: " .. arrowCount .. "/10")
-        print("🎉 Farming complete! Script stopped.")
+        print("⏸️ Waiting for items to be used...")
         SendWebhook("✅ Farming complete! Rokas: " .. rokaCount .. " | Arrows: " .. arrowCount)
-        break -- Stop the loop
+        
+        -- ✅ CHANGED: Wait instead of stopping - monitor inventory
+        while rokaCount >= 10 and arrowCount >= 10 do
+            task.wait(2) -- Check every 2 seconds
+            
+            -- Recount items
+            rokaCount = 0
+            arrowCount = 0
+            for _, Tool in pairs(Player.Backpack:GetChildren()) do
+                if Tool.Name == "Rokakaka" then
+                    rokaCount = rokaCount + 1
+                elseif Tool.Name == "Mysterious Arrow" then
+                    arrowCount = arrowCount + 1
+                end
+            end
+            
+            print("⏸️ Waiting... (Rokas: " .. rokaCount .. "/10 | Arrows: " .. arrowCount .. "/10)")
+        end
+        
+        print("🔄 Items used! Resuming farming...")
+        SendWebhook("🔄 Items below 10, resuming farm...")
     end
     
     print("=== Farming Rokas & Arrows === (Rokas: " .. rokaCount .. "/10 | Arrows: " .. arrowCount .. "/10)")
